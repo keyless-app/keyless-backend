@@ -1,6 +1,6 @@
 # Keyless - AI Generation Platform
 
-<img width="3375" height="3375" alt="banner" src="https://github.com/user-attachments/assets/8d7377d0-2995-4875-85ab-2de1eef70c83" />
+<img width="4688" height="1563" alt="banner" src="https://github.com/user-attachments/assets/970afedd-9c36-4bea-8fdf-86499f2f75aa" />
 
 > **Train AI models. Earn points. Generate without limits.**
 

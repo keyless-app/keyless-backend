@@ -1,10 +1,16 @@
 # Keyless - AI Generation Platform (Solana-based)
 
+[![npm version](https://img.shields.io/npm/v/@keyless/keyless-api.svg)](https://www.npmjs.com/package/@keyless/keyless-api)
+[![npm downloads](https://img.shields.io/npm/dm/@keyless/keyless-api.svg)](https://www.npmjs.com/package/@keyless/keyless-api)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 <img width="4688" height="1563" alt="banner" src="https://github.com/user-attachments/assets/970afedd-9c36-4bea-8fdf-86499f2f75aa" />
 
 > **Train AI models. Earn $KEY. Generate without limits. Powered by Solana.**
 
 An AI platform powered by Solana's high-speed, low-cost blockchain. The first AI platform with a real-time, transparent buyback mechanism powered by Solana's speed.
+
+**📦 Available on npm:** [@keyless/keyless-api](https://www.npmjs.com/package/@keyless/keyless-api)
 
 ## 🎯 What is Keyless?
 
@@ -138,6 +144,8 @@ For complete structure details, see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
 ## 📦 Installation
 
 ### Install from npm (Recommended)
+
+The package is available on npm: **[@keyless/keyless-api](https://www.npmjs.com/package/@keyless/keyless-api)**
 
 ```bash
 npm install @keyless/keyless-api

@@ -1,6 +1,6 @@
 # Keyless - AI Generation Platform (Solana-based)
 
-<img width="4688" height="1563" alt="banner keyless 2-min" src="https://github.com/user-attachments/assets/f8470b0d-ed40-4b3e-bd99-7221901f780c" />
+<img width="4688" height="1563" alt="banner" src="https://github.com/user-attachments/assets/970afedd-9c36-4bea-8fdf-86499f2f75aa" />
 
 > **Train AI models. Earn $KEY. Generate without limits. Powered by Solana.**
 

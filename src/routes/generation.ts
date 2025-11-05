@@ -18,7 +18,7 @@ keyless.initialize().catch(console.error);
  */
 router.post(
   "/text",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { prompt, config } = req.body;
     const userId = req.userId || "guest";
 
@@ -53,7 +53,7 @@ router.post(
  */
 router.post(
   "/image",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { prompt, config } = req.body;
     const userId = req.userId || "guest";
 
@@ -88,7 +88,7 @@ router.post(
  */
 router.post(
   "/code",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { prompt, config } = req.body;
     const userId = req.userId || "guest";
 
@@ -123,7 +123,7 @@ router.post(
  */
 router.post(
   "/audio",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { prompt, config } = req.body;
     const userId = req.userId || "guest";
 
@@ -158,7 +158,7 @@ router.post(
  */
 router.post(
   "/analysis",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { prompt, config } = req.body;
     const userId = req.userId || "guest";
 
@@ -193,7 +193,7 @@ router.post(
  */
 router.post(
   "/search",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { prompt, config } = req.body;
     const userId = req.userId || "guest";
 
@@ -228,7 +228,7 @@ router.post(
  */
 router.get(
   "/history",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const userId = req.userId || "guest";
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 50;
 

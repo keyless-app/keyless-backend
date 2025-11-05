@@ -17,7 +17,7 @@ keyless.initialize().catch(console.error);
  */
 router.post(
   "/",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const { type, modelId, data, keyEarned } = req.body;
     const userId = req.userId || req.walletAddress || "guest";
 
@@ -56,7 +56,7 @@ router.post(
  */
 router.get(
   "/",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const userId = req.userId || "guest";
 
     const contributions = await keyless.getUserContributions(userId);

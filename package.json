@@ -1,10 +1,36 @@
 {
-  "name": "keyless-api",
+  "name": "@keyless/keyless-api",
   "version": "1.0.0",
-  "description": "AI generation platform with points-based content creation",
+  "description": "Solana-powered AI generation platform with Revenue-to-Buyback Flywheel. The first AI platform with real-time, transparent buyback mechanism powered by Solana's speed and low fees.",
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./core": {
+      "import": "./dist/core/index.js",
+      "require": "./dist/core/index.js",
+      "types": "./dist/core/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types/index.js",
+      "require": "./dist/types/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "package.json"
+  ],
   "scripts": {
-    "build": "tsc",
+    "build": "node scripts/build.js",
+    "prepublishOnly": "npm run clean && npm run build",
+    "prepack": "npm run clean && npm run build",
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "test": "jest",
@@ -12,7 +38,7 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
-    "clean": "rm -rf dist coverage",
+    "clean": "node scripts/clean.js",
     "example": "ts-node examples/basic-usage.ts",
     "example:build": "tsc examples/basic-usage.ts --outDir dist/examples --target es2020 --module commonjs",
     "example:api": "node examples/api-usage.js",
@@ -23,6 +49,14 @@
     "artificial-intelligence",
     "ai-generation",
     "machine-learning",
+    "solana",
+    "blockchain",
+    "spl-token",
+    "usdc",
+    "jupiter",
+    "dex",
+    "buyback",
+    "flywheel",
     "points-system",
     "text-generation",
     "image-generation",
@@ -30,7 +64,10 @@
     "audio-generation",
     "keyless",
     "api",
-    "rest-api"
+    "rest-api",
+    "web3",
+    "crypto",
+    "token"
   ],
   "author": "Keyless Team",
   "license": "MIT",
@@ -42,6 +79,9 @@
     "url": "https://github.com/keyless/keyless-api/issues"
   },
   "homepage": "https://github.com/keyless/keyless-api#readme",
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "express": "^4.18.2",
     "cors": "^2.8.5",

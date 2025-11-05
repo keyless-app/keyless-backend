@@ -108,7 +108,6 @@ const getStatusCodeFromErrorCode = (code: string): number => {
     POINTS_MANAGER_INIT_ERROR: 500,
     AI_GENERATION_MANAGER_INIT_ERROR: 500,
     CONTRIBUTION_MANAGER_INIT_ERROR: 500,
-    USER_NOT_FOUND: 404,
     GENERATION_NOT_FOUND: 404,
   };
 

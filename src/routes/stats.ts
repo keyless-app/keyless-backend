@@ -17,7 +17,7 @@ keyless.initialize().catch(console.error);
  */
 router.get(
   "/user",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const userId = req.userId || "guest";
 
     const stats = await keyless.getUserStats(userId);
@@ -46,7 +46,7 @@ router.get(
  */
 router.get(
   "/platform",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const stats = await keyless.getPlatformStats();
 
     res.json({

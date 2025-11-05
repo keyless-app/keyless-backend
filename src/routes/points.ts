@@ -17,7 +17,7 @@ keyless.initialize().catch(console.error);
  */
 router.get(
   "/balance",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const userId = req.userId || "guest";
 
     const balance = await keyless.getUserPoints(userId);
@@ -37,7 +37,7 @@ router.get(
  */
 router.get(
   "/transactions",
-  asyncHandler(async (req: AuthenticatedRequest, res) => {
+  asyncHandler(async (req: AuthenticatedRequest, res: express.Response) => {
     const userId = req.userId || "guest";
 
     const pointsManager = keyless.getPointsManager();

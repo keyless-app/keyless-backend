@@ -137,6 +137,14 @@ For complete structure details, see [PROJECT_STRUCTURE.md](PROJECT_STRUCTURE.md)
 
 ## 📦 Installation
 
+### Install from npm (Recommended)
+
+```bash
+npm install @keyless/keyless-api
+```
+
+### Install from source
+
 ```bash
 git clone https://github.com/keyless/keyless-api.git
 cd keyless-api
@@ -165,7 +173,7 @@ CORS_ORIGIN=*
 SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
 SOLANA_NETWORK=mainnet-beta
 KEY_TOKEN_MINT=your-key-token-mint-address
-USDC_MINT=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+USDC_MINT=usd-key-here
 REWARDS_TREASURY_WALLET=your-rewards-treasury-wallet
 JUPITER_API_URL=https://quote-api.jup.ag/v6
 POINTS_PRICE_USDC=0.001

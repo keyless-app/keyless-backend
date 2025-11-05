@@ -1,0 +1,137 @@
+# Source files (use compiled dist/)
+src/
+*.ts
+!*.d.ts
+
+# Development files
+examples/
+.env
+.env.*
+!.env.example
+
+# Test files
+test/
+tests/
+*.test.ts
+*.spec.ts
+coverage/
+.nyc_output/
+jest.config.js
+
+# Documentation (keep README.md)
+docs/
+PROJECT_STRUCTURE.md
+CONTRIBUTING.md
+CHANGELOG.md
+
+# AI Services (Python)
+ai-services/
+*.py
+requirements.txt
+
+# Build artifacts
+tsconfig.json
+*.log
+*.pid
+*.seed
+*.pid.lock
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Docker
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Logs
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Solana
+.anchor/
+target/
+**/*.rs.bk
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+*.egg
+
+# AI Model Files
+*.pt
+*.pth
+*.onnx
+*.pb
+models/*.h5
+models/*.pkl
+
+# Blockchain
+hardhat_cache/
+artifacts/
+cache/
+broadcast/
+typechain-types/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Build outputs (keep dist/)
+build/
+lib/
+
+

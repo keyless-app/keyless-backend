@@ -7,6 +7,9 @@ import {
 
 /**
  * Manages points balance, transactions, and history
+ * 
+ * Points are purchased with USDC (SPL) by Spenders.
+ * Points are spent on API calls.
  */
 export class PointsManager {
   private config: KeylessConfig;
@@ -32,7 +35,36 @@ export class PointsManager {
   }
 
   /**
-   * Add points to user account
+   * Purchase points with USDC (for Spenders)
+   * This is called after a USDC payment is verified on-chain
+   */
+  async purchasePoints(
+    userId: string,
+    amount: number,
+    usdcAmount: number,
+    solanaTxHash: string,
+    description: string = "Points purchased with USDC"
+  ): Promise<string> {
+    const transactionId = this.generateTransactionId();
+
+    const transaction: PointsTransaction = {
+      id: transactionId,
+      userId,
+      type: PointsTransactionType.PURCHASED,
+      amount,
+      description,
+      usdcAmount,
+      solanaTxHash,
+      createdAt: new Date(),
+    };
+
+    this.transactions.set(transactionId, transaction);
+    return transactionId;
+  }
+
+  /**
+   * Add points to user account (legacy method, kept for compatibility)
+   * Note: Points should now be purchased, not earned
    */
   async addPoints(
     userId: string,
@@ -45,7 +77,7 @@ export class PointsManager {
     const transaction: PointsTransaction = {
       id: transactionId,
       userId,
-      type: PointsTransactionType.EARNED,
+      type: PointsTransactionType.PURCHASED,
       amount,
       description,
       referenceId,
@@ -103,8 +135,19 @@ export class PointsManager {
   async getBalanceFromTransactions(userId: string): Promise<number> {
     const transactions = await this.getUserTransactions(userId);
     return transactions.reduce((balance, transaction) => {
+      // Purchased points are positive, spent points are negative
       return balance + transaction.amount;
     }, 0);
+  }
+
+  /**
+   * Get total USDC spent by user (for Spenders)
+   */
+  async getTotalUsdcSpent(userId: string): Promise<number> {
+    const transactions = await this.getUserTransactions(userId);
+    return transactions
+      .filter((t) => t.type === PointsTransactionType.PURCHASED && t.usdcAmount)
+      .reduce((sum, t) => sum + (t.usdcAmount || 0), 0);
   }
 
   /**

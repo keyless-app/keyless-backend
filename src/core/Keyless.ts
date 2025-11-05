@@ -1,6 +1,7 @@
 import {
   KeylessConfig,
   User,
+  UserType,
   AIGenerationRequest,
   AITool,
   GenerationConfig,
@@ -109,14 +110,14 @@ export class Keyless {
   }
 
   /**
-   * Earn points from contribution
+   * Add contribution (Contributors earn $KEY tokens, not points)
    */
   async addContribution(
     userId: string,
     type: string,
     modelId: string,
     data: any,
-    pointsEarned: number
+    keyEarned: number
   ): Promise<string> {
     // Add contribution
     const contributionId = await this.contributionManager.addContribution(
@@ -124,23 +125,19 @@ export class Keyless {
       type,
       modelId,
       data,
-      pointsEarned
+      keyEarned
     );
 
-    // Award points
-    await this.pointsManager.addPoints(
-      userId,
-      pointsEarned,
-      `Contribution: ${type}`
-    );
-
-    // Update user stats
+    // Update user stats (Contributors earn $KEY, not points)
     const user = this.users.get(userId);
     if (user) {
-      user.pointsBalance += pointsEarned;
+      user.keyBalance += keyEarned;
       user.contributions += 1;
       this.users.set(userId, user);
     }
+
+    // Note: $KEY tokens are paid out from Rewards Treasury
+    // This is handled separately via the Solana payment service
 
     return contributionId;
   }
@@ -165,12 +162,8 @@ export class Keyless {
     );
     const transactions = await this.pointsManager.getUserTransactions(userId);
 
-    const pointsEarned = transactions
-      .filter(
-        (t) =>
-          t.type === PointsTransactionType.EARNED ||
-          t.type === PointsTransactionType.BONUS
-      )
+    const pointsPurchased = transactions
+      .filter((t) => t.type === PointsTransactionType.PURCHASED)
       .reduce((sum, t) => sum + t.amount, 0);
 
     const pointsSpent = transactions
@@ -197,8 +190,10 @@ export class Keyless {
 
     return {
       userId,
+      userType: user.userType,
       totalPoints: user.pointsBalance,
-      pointsEarned,
+      keyBalance: user.keyBalance,
+      pointsPurchased: user.userType === UserType.SPENDER ? pointsPurchased : undefined,
       pointsSpent,
       contributions: user.contributions,
       generations: generations.length,
@@ -217,13 +212,13 @@ export class Keyless {
     const allGenerations = await this.aiGenerationManager.getAllGenerations();
     const allTransactions = await this.pointsManager.getAllTransactions();
 
-    const totalPointsGenerated = allTransactions
-      .filter(
-        (t) =>
-          t.type === PointsTransactionType.EARNED ||
-          t.type === PointsTransactionType.BONUS
-      )
+    const totalPointsPurchased = allTransactions
+      .filter((t) => t.type === PointsTransactionType.PURCHASED)
       .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalUsdcReceived = allTransactions
+      .filter((t) => t.type === PointsTransactionType.PURCHASED && t.usdcAmount)
+      .reduce((sum, t) => sum + (t.usdcAmount || 0), 0);
 
     const totalPointsSpent = allTransactions
       .filter((t) => t.type === PointsTransactionType.SPENT)
@@ -261,9 +256,23 @@ export class Keyless {
     const contributions =
       await this.contributionManager.getTotalContributions();
 
+    const totalSpenders = users.filter((u) => u.userType === UserType.SPENDER).length;
+    const totalContributors = users.filter((u) => u.userType === UserType.CONTRIBUTOR).length;
+
+    const totalKeyDistributed = Array.from(users.values())
+      .reduce((sum, u) => sum + u.keyBalance, 0);
+
+    // Note: totalKeyPurchased would come from the buyback service
+    // For MVP, we'll set it to 0 and it would be populated from on-chain data
+
     return {
       totalUsers: users.length,
-      totalPointsGenerated,
+      totalSpenders,
+      totalContributors,
+      totalUsdcReceived,
+      totalKeyPurchased: 0, // Would be populated from buyback service
+      totalKeyDistributed,
+      totalPointsPurchased,
       totalPointsSpent,
       totalGenerations: allGenerations.length,
       generationsByTool,
@@ -271,7 +280,7 @@ export class Keyless {
       activeUsers24h,
       activeUsers7d,
       averagePointsPerUser:
-        users.length > 0 ? totalPointsGenerated / users.length : 0,
+        users.length > 0 ? totalPointsPurchased / users.length : 0,
     };
   }
 
@@ -307,11 +316,11 @@ export class Keyless {
   }
 
   /**
-   * Get user by wallet address
+   * Get user by Solana wallet address
    */
   async getUserByWallet(walletAddress: string): Promise<User | null> {
     for (const user of this.users.values()) {
-      if (user.walletAddress === walletAddress) {
+      if (user.solanaWalletAddress === walletAddress) {
         return user;
       }
     }

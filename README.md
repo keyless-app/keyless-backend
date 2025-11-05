@@ -1,25 +1,44 @@
-# Keyless - AI Generation Platform
+# Keyless - AI Generation Platform (Solana-based)
 
 <img width="4688" height="1563" alt="banner keyless 2-min" src="https://github.com/user-attachments/assets/f8470b0d-ed40-4b3e-bd99-7221901f780c" />
 
-> **Train AI models. Earn points. Generate without limits.**
+> **Train AI models. Earn $KEY. Generate without limits. Powered by Solana.**
 
-An AI platform where users contribute data and feedback to train models, earn points from contributions, and use those points to generate AI content (text, images, code, audio, data analysis, and research) without API fees or subscriptions.
+An AI platform powered by Solana's high-speed, low-cost blockchain. The first AI platform with a real-time, transparent buyback mechanism powered by Solana's speed.
 
 ## 🎯 What is Keyless?
 
-Keyless is an AI generation platform that democratizes access to AI content creation through a points-based system:
+Keyless is an AI generation platform that democratizes access to AI content creation through a **Revenue-to-Buyback Flywheel** powered by Solana:
 
-- **Train & Earn**: Contribute training data, feedback, annotations, or evaluations to improve AI models and earn points
-- **Points-Based Generation**: Use points to generate AI content (text, images, code, audio, analysis, research) without API fees
-- **Independent**: No subscriptions, usage limits, or credit cards required
-- **Wallet Integration**: Use your wallet address as your unique identifier for seamless access
+### The Flywheel
+
+**Revenue** → **Spenders** (developers) pay in USDC (SPL) to purchase "Points" for API access
+
+**Buyback** → A large portion of that USDC is immediately swapped for $KEY (SPL) on a Solana DEX (Jupiter/Raydium)
+
+**Reward** → Purchased $KEY is sent to the "Contributor Rewards Treasury"
+
+**Distribution** → **Contributors** (users training models) earn $KEY from this treasury
+
+This flywheel is highly efficient on Solana, as the buyback swaps are near-instant and cost fractions of a cent.
+
+### Two User Types
+
+- **Spenders**: Developers who pay USDC (SPL) to purchase "Points" and use the AI API
+- **Contributors**: Users who train models and earn $KEY tokens from the Rewards Treasury
+
+### Key Features
+
+- **Solana Wallet Authentication**: Connect your Phantom, Solflare, or any Solana wallet
+- **Pay-as-you-go**: No credit cards, no monthly subscriptions—just USDC
+- **Transparent Buyback**: All buyback transactions are on-chain and visible
+- **Fast & Cheap**: Powered by Solana's speed and low fees
 
 ## 🚀 Key Features
 
-### Points-Based AI Generation
+### For Spenders: Pay-as-you-go AI API
 
-Generate AI content using points earned from contributions:
+Purchase Points with USDC (SPL) and use them to generate AI content:
 
 - **Text Generation** (5 points): Create articles, stories, summaries, and more
 - **Image Generation** (8 points): Generate images from text descriptions
@@ -28,15 +47,19 @@ Generate AI content using points earned from contributions:
 - **Data Analysis** (6 points): Analyze data and generate insights
 - **Search & Research** (6 points): Search and research topics with AI
 
-### Contributing to AI
+**Price**: 1 Point = $0.001 USDC (e.g., 1000 points = $1 USDC)
 
-Earn points by contributing to improve AI models:
+### For Contributors: Train AI & Earn $KEY
 
-- Provide training data
+Earn $KEY tokens by contributing to improve AI models:
+
+- Provide training data (prompt/response pairs)
 - Submit feedback on AI outputs
 - Annotate data for model training
 - Evaluate model performance
 - Suggest improvements
+
+**Reward**: $KEY tokens are paid out from the Rewards Treasury (funded by buyback)
 
 ### Core Infrastructure
 
@@ -95,12 +118,14 @@ keyless/
 - **Data Analysis**: Custom ML models
 - **Model Training**: Retraining with contributions
 
-#### 3. **Blockchain Layer**
+#### 3. **Solana Blockchain Layer**
 
-- **Solidity Smart Contracts** for points system
-- **Transparent transactions** on-chain
-- **Wallet integration** for API authentication
-- **Decentralized point tracking**
+- **Solana Program** for payment/buyback automation
+- **$KEY SPL Token** on Solana mainnet
+- **USDC (SPL)** payments from Spenders
+- **Jupiter/Raydium** for USDC → $KEY swaps
+- **Transparent buyback** transactions on-chain
+- **Solana wallet** authentication (Phantom, Solflare, etc.)
 
 #### 4. **Database Layer**
 
@@ -136,6 +161,15 @@ PORT=3000
 NODE_ENV=production
 CORS_ORIGIN=*
 
+# Solana Configuration
+SOLANA_RPC_URL=https://api.mainnet-beta.solana.com
+SOLANA_NETWORK=mainnet-beta
+KEY_TOKEN_MINT=your-key-token-mint-address
+USDC_MINT=EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v
+REWARDS_TREASURY_WALLET=your-rewards-treasury-wallet
+JUPITER_API_URL=https://quote-api.jup.ag/v6
+POINTS_PRICE_USDC=0.001
+
 # Optional: AI service configurations
 TEXT_GENERATION_MODEL=gpt-4
 IMAGE_GENERATION_MODEL=dall-e-3
@@ -154,14 +188,16 @@ npm run build
 npm start
 ```
 
-### 3. Wallet Authentication
+### 3. Solana Wallet Authentication
 
-All API endpoints require a valid wallet ID in the `X-Wallet-ID` header:
+All API endpoints require a valid Solana wallet address in the `X-Wallet-Address` header:
 
 ```bash
-curl -H "X-Wallet-ID: {WALLET_ID}" \
+curl -H "X-Wallet-Address: {SOLANA_WALLET_ADDRESS}" \
      https://{BASE_URL}/health
 ```
+
+**Supported Wallets**: Phantom, Solflare, or any Solana wallet
 
 ## 🔑 API Endpoints
 
@@ -219,11 +255,29 @@ Earn points by contributing to improve AI models:
 
 ## 📋 Example API Calls
 
+### Purchase Points (Spenders)
+
+```bash
+curl -X POST \
+  -H "X-Wallet-Address: {SOLANA_WALLET_ADDRESS}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "usdcAmount": 10.0
+  }' \
+  https://{BASE_URL}/api/payment/purchase
+```
+
+This will:
+1. Accept USDC payment from your wallet
+2. Credit your account with Points (1 Point = $0.001 USDC)
+3. Trigger automatic buyback: swap ~80% of USDC for $KEY
+4. Send $KEY to Rewards Treasury
+
 ### Generate Text Content
 
 ```bash
 curl -X POST \
-  -H "X-Wallet-ID: {WALLET_ID}" \
+  -H "X-Wallet-Address: {SOLANA_WALLET_ADDRESS}" \
   -H "Content-Type: application/json" \
   -d '{
     "prompt": "Write a short story about an AI assistant",
@@ -266,29 +320,38 @@ curl -X POST \
   https://{BASE_URL}/api/generation/code
 ```
 
-### Add Contribution
+### Add Contribution (Contributors)
 
 ```bash
 curl -X POST \
-  -H "X-Wallet-ID: {WALLET_ID}" \
+  -H "X-Wallet-Address: {SOLANA_WALLET_ADDRESS}" \
   -H "Content-Type: application/json" \
   -d '{
     "type": "training_data",
     "modelId": "model_001",
     "data": {
-      "text": "Sample training data",
-      "label": "positive"
+      "prompt": "Sample prompt",
+      "response": "Sample response"
     },
-    "pointsEarned": 15
+    "keyEarned": 50
   }' \
   https://{BASE_URL}/api/contributions
 ```
 
-### Get Points Balance
+Contributors earn $KEY tokens (not points). $KEY tokens are paid out from the Rewards Treasury.
+
+### Get Points Balance (Spenders)
 
 ```bash
-curl -H "X-Wallet-ID: {WALLET_ID}" \
+curl -H "X-Wallet-Address: {SOLANA_WALLET_ADDRESS}" \
      https://{BASE_URL}/api/points/balance
+```
+
+### Get $KEY Balance (Contributors)
+
+```bash
+curl -H "X-Wallet-Address: {SOLANA_WALLET_ADDRESS}" \
+     https://{BASE_URL}/api/key/balance
 ```
 
 ### Get User Statistics
@@ -324,10 +387,12 @@ curl -H "X-Wallet-ID: {WALLET_ID}" \
 - **Models**: GPT-4, DALL-E, Claude, Stable Diffusion
 - **Training**: PyTorch + Transformers
 
-### Blockchain
+### Blockchain (Solana)
 
-- **Smart Contracts**: Solidity
-- **Integration**: Web3.js, Ethers.js
+- **Smart Contracts**: Solana Programs (Rust/Anchor)
+- **Integration**: @solana/web3.js, @solana/spl-token
+- **DEX Integration**: Jupiter Aggregator API
+- **Token Standards**: SPL Token
 
 ## 🤝 Contributing
 
@@ -345,4 +410,13 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-**Keyless**: Democratizing AI content generation through community contributions.
+**Keyless**: The first AI platform with a real-time, transparent buyback mechanism, powered by Solana's speed and low fees.
+
+## 🎯 The Revenue-to-Buyback Flywheel
+
+1. **Spenders** pay USDC (SPL) → Purchase Points → Use API
+2. **Buyback** automatically swaps USDC → $KEY via Jupiter/Raydium
+3. **$KEY** goes to Rewards Treasury
+4. **Contributors** earn $KEY for training models
+
+All powered by Solana's near-instant, low-cost transactions.

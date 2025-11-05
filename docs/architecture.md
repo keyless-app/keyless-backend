@@ -156,15 +156,16 @@ keyless/
   - Data analysis
   - Search & research
 
-### 3. Blockchain Layer
+### 3. Solana Blockchain Layer
 
-- **Purpose**: Transparent point system
-- **Tech Stack**: Solidity, Web3.js, Smart Contracts
+- **Purpose**: Payment processing, buyback automation, and $KEY token distribution
+- **Tech Stack**: Solana, @solana/web3.js, @solana/spl-token, Jupiter API
 - **Responsibilities**:
-  - Point transactions
-  - Contribution verification
-  - Trustless point rewards
-  - Transaction history
+  - USDC (SPL) payment processing
+  - Automatic buyback: USDC → $KEY swaps via Jupiter/Raydium
+  - $KEY token distribution to Contributors
+  - On-chain transaction verification
+  - Wallet address validation
 
 ### 4. Database Layer
 
@@ -181,28 +182,43 @@ keyless/
 ```
 ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
 │   Client    │─────▶│   Backend   │─────▶│AI Services  │
-│             │      │ (TypeScript)│      │  (Python)   │
-└─────────────┘      └─────────────┘      └─────────────┘
-                             │
-                             ▼
-                      ┌─────────────┐
-                      │  Blockchain │
-                      │ (Solidity)  │
-                      └─────────────┘
-                             │
-                             ▼
-                      ┌─────────────┐
-                      │  Database   │
-                      │(PostgreSQL) │
-                      └─────────────┘
+│ (Solana     │      │ (TypeScript)│      │  (Python)   │
+│  Wallet)    │      └─────────────┘      └─────────────┘
+└─────────────┘             │
+                            │
+                            ▼
+                    ┌─────────────┐
+                    │   Solana    │
+                    │  Blockchain │
+                    │  (Payment/  │
+                    │  Buyback)   │
+                    └─────────────┘
+                            │
+                            ▼
+                    ┌─────────────┐
+                    │  Database   │
+                    │(PostgreSQL) │
+                    └─────────────┘
 ```
 
 ## Technology Flow
 
-1. **User Request** → Backend API
-2. **Authentication** → JWT + API Key validation
-3. **Points Check** → Database query
-4. **Points Deduction** → Blockchain transaction
-5. **AI Generation** → Python service
-6. **Result Return** → Backend → User
-7. **Points Award** → Blockchain (for contributions)
+### For Spenders (API Users):
+
+1. **User Request** → Backend API (with Solana wallet address)
+2. **Authentication** → Solana wallet address validation
+3. **Payment** → USDC (SPL) payment on Solana
+4. **Points Credit** → Database ledger (off-chain)
+5. **Buyback** → Automatic swap USDC → $KEY via Jupiter
+6. **$KEY to Treasury** → Rewards Treasury wallet
+7. **Points Check** → Database query
+8. **Points Deduction** → Database (off-chain)
+9. **AI Generation** → Python service
+10. **Result Return** → Backend → User
+
+### For Contributors (Model Trainers):
+
+1. **Contribution** → Submit training data via API
+2. **Review** → Contribution approved/rejected
+3. **$KEY Reward** → $KEY tokens credited (database)
+4. **Payout** → $KEY sent from Treasury to Contributor wallet (on-chain)

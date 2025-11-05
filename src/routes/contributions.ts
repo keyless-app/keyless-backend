@@ -12,14 +12,14 @@ keyless.initialize().catch(console.error);
 
 /**
  * @route POST /api/contributions
- * @desc Add a contribution to earn points
- * @access Private (with API key)
+ * @desc Add a contribution to earn $KEY tokens
+ * @access Private (with Solana wallet address)
  */
 router.post(
   "/",
   asyncHandler(async (req: AuthenticatedRequest, res) => {
-    const { type, modelId, data, pointsEarned } = req.body;
-    const userId = req.userId || "guest";
+    const { type, modelId, data, keyEarned } = req.body;
+    const userId = req.userId || req.walletAddress || "guest";
 
     if (!type || !modelId || !data) {
       return res.status(400).json({
@@ -30,20 +30,20 @@ router.post(
       });
     }
 
-    const points = pointsEarned || 10; // Default points
+    const keyAmount = keyEarned || 10; // Default $KEY tokens
     const contributionId = await keyless.addContribution(
       userId,
       type,
       modelId,
       data,
-      points
+      keyAmount
     );
 
     res.status(201).json({
       success: true,
       data: { contributionId },
       message: "Contribution added successfully",
-      pointsEarned: points,
+      keyEarned: keyAmount,
       timestamp: new Date().toISOString(),
     });
   })
@@ -52,7 +52,7 @@ router.post(
 /**
  * @route GET /api/contributions
  * @desc Get user contributions
- * @access Private (with API key)
+ * @access Private (with Solana wallet address)
  */
 router.get(
   "/",

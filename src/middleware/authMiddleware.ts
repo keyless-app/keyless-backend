@@ -1,50 +1,58 @@
 import { Request, Response, NextFunction } from "express";
-import { validateApiKey } from "../utils/apiKeyValidator";
 import { DEFAULT_CONFIG } from "../config";
+import { SolanaService } from "../../blockchain/services/solana";
 
 export interface AuthenticatedRequest extends Request {
-  apiKey?: string;
+  walletAddress?: string;
   userId?: string;
-  permissions?: string[];
+  userType?: string;
 }
 
+/**
+ * Solana Wallet Authentication Middleware
+ * 
+ * Authenticates users via their Solana wallet address.
+ * The wallet address serves as the API key.
+ */
 export const authMiddleware = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const apiKey = req.headers[
-      DEFAULT_CONFIG.apiKeyHeader.toLowerCase()
-    ] as string;
+    // Get wallet address from header (X-Wallet-Address or X-Solana-Wallet)
+    const walletAddress = 
+      (req.headers["x-wallet-address"] as string) ||
+      (req.headers["x-solana-wallet"] as string) ||
+      (req.headers[DEFAULT_CONFIG.apiKeyHeader.toLowerCase()] as string);
 
-    if (!apiKey) {
+    if (!walletAddress) {
       return res.status(401).json({
-        error: "API key required",
-        message: `Please provide a valid API key in the ${DEFAULT_CONFIG.apiKeyHeader} header`,
-        code: "MISSING_API_KEY",
+        error: "Wallet address required",
+        message: `Please provide a valid Solana wallet address in the X-Wallet-Address header`,
+        code: "MISSING_WALLET_ADDRESS",
       });
     }
 
-    // Validate the API key
-    const validationResult = await validateApiKey(apiKey);
-
-    if (!validationResult.valid) {
+    // Validate Solana wallet address format
+    const solanaService = new SolanaService(DEFAULT_CONFIG.solana);
+    if (!solanaService.validateWalletAddress(walletAddress)) {
       return res.status(401).json({
-        error: "Invalid API key",
-        message: "The provided API key is invalid or expired",
-        code: "INVALID_API_KEY",
+        error: "Invalid wallet address",
+        message: "The provided Solana wallet address is invalid",
+        code: "INVALID_WALLET_ADDRESS",
       });
     }
 
-    // Attach user information to the request
-    req.apiKey = apiKey;
-    req.userId = validationResult.userId;
-    req.permissions = validationResult.permissions;
+    // Attach wallet information to the request
+    req.walletAddress = walletAddress;
+    // In production, you would look up the user by wallet address
+    // For MVP, we'll use the wallet address as the userId
+    req.userId = walletAddress;
 
     // Log API usage
     console.log(
-      `API Request: ${req.method} ${req.path} - User: ${validationResult.userId} - IP: ${req.ip}`
+      `API Request: ${req.method} ${req.path} - Wallet: ${walletAddress} - IP: ${req.ip}`
     );
 
     next();
@@ -65,17 +73,16 @@ export const optionalAuthMiddleware = async (
   next: NextFunction
 ) => {
   try {
-    const apiKey = req.headers[
-      DEFAULT_CONFIG.apiKeyHeader.toLowerCase()
-    ] as string;
+    const walletAddress = 
+      (req.headers["x-wallet-address"] as string) ||
+      (req.headers["x-solana-wallet"] as string) ||
+      (req.headers[DEFAULT_CONFIG.apiKeyHeader.toLowerCase()] as string);
 
-    if (apiKey) {
-      const validationResult = await validateApiKey(apiKey);
-
-      if (validationResult.valid) {
-        req.apiKey = apiKey;
-        req.userId = validationResult.userId;
-        req.permissions = validationResult.permissions;
+    if (walletAddress) {
+      const solanaService = new SolanaService(DEFAULT_CONFIG.solana);
+      if (solanaService.validateWalletAddress(walletAddress)) {
+        req.walletAddress = walletAddress;
+        req.userId = walletAddress;
       }
     }
 

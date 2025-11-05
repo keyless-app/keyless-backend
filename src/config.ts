@@ -1,7 +1,19 @@
 import dotenv from "dotenv";
-import { KeylessConfig } from "./types";
+import { KeylessConfig, SolanaConfig } from "./types";
 
 dotenv.config();
+
+// Solana configuration
+const solanaConfig: SolanaConfig = {
+  rpcUrl: process.env.SOLANA_RPC_URL || "https://api.mainnet-beta.solana.com",
+  network: (process.env.SOLANA_NETWORK as any) || "mainnet-beta",
+  keyTokenMint: process.env.KEY_TOKEN_MINT || "", // $KEY token mint address (SPL)
+  usdcMint: process.env.USDC_MINT || "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v", // USDC mint (SPL)
+  rewardsTreasuryWallet: process.env.REWARDS_TREASURY_WALLET || "", // Treasury wallet for $KEY rewards
+  paymentProgramId: process.env.PAYMENT_PROGRAM_ID, // Optional: Solana program ID for payment/buyback
+  jupiterApiUrl: process.env.JUPITER_API_URL || "https://quote-api.jup.ag/v6", // Jupiter aggregator API
+  pointsPriceUsdc: parseFloat(process.env.POINTS_PRICE_USDC || "0.001"), // Price of 1 Point in USDC
+};
 
 export const DEFAULT_CONFIG: KeylessConfig = {
   jwtSecret: process.env.JWT_SECRET || "your-secret-key-change-in-production",
@@ -10,8 +22,10 @@ export const DEFAULT_CONFIG: KeylessConfig = {
   port: parseInt(process.env.PORT || "3000"),
   environment: (process.env.NODE_ENV as any) || "development",
   corsOrigin: process.env.CORS_ORIGIN || "*",
-  apiKeyHeader: process.env.API_KEY_HEADER || "X-API-Key",
+  apiKeyHeader: process.env.API_KEY_HEADER || "X-Wallet-Address",
   maxRequestsPerMinute: parseInt(process.env.MAX_REQUESTS_PER_MINUTE || "100"),
+  // Solana configuration
+  solana: solanaConfig,
   // AI service configurations
   textGenerationModel: process.env.TEXT_GENERATION_MODEL || "gpt-4",
   imageGenerationModel: process.env.IMAGE_GENERATION_MODEL || "dall-e-3",

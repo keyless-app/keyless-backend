@@ -1,15 +1,20 @@
-// Core types for Keyless AI Platform
+// Core types for Keyless AI Platform (Solana-based)
 
 export interface User {
   id: string;
-  email: string;
-  passwordHash: string;
-  walletAddress: string; // Used as API key
-  pointsBalance: number;
+  solanaWalletAddress: string; // Solana wallet address (e.g., Phantom, Solflare)
+  userType: UserType; // SPENDER or CONTRIBUTOR
+  pointsBalance: number; // Points purchased with USDC (for Spenders)
+  keyBalance: number; // $KEY token balance (for Contributors)
   contributions: number;
   contributionsHistory: Contribution[];
   createdAt: Date;
   updatedAt: Date;
+}
+
+export enum UserType {
+  SPENDER = "spender", // Developer who pays USDC to use API
+  CONTRIBUTOR = "contributor", // User who trains models and earns $KEY
 }
 
 export interface Contribution {
@@ -18,8 +23,9 @@ export interface Contribution {
   type: ContributionType;
   modelId: string;
   data: any;
-  pointsEarned: number;
+  keyEarned: number; // $KEY tokens earned (not points)
   status: ContributionStatus;
+  payoutTxHash?: string; // Solana transaction hash for $KEY payout
   createdAt: Date;
 }
 
@@ -44,14 +50,15 @@ export interface PointsTransaction {
   amount: number;
   description: string;
   referenceId?: string;
+  usdcAmount?: number; // USDC amount paid (for purchases)
+  solanaTxHash?: string; // Solana transaction hash
   createdAt: Date;
 }
 
 export enum PointsTransactionType {
-  EARNED = "earned",
-  SPENT = "spent",
+  PURCHASED = "purchased", // Points purchased with USDC
+  SPENT = "spent", // Points spent on API calls
   REFUNDED = "refunded",
-  BONUS = "bonus",
 }
 
 export interface AIGenerationRequest {
@@ -156,8 +163,10 @@ export interface SearchResultItem {
 
 export interface UserStats {
   userId: string;
-  totalPoints: number;
-  pointsEarned: number;
+  userType: UserType;
+  totalPoints: number; // For Spenders: points balance
+  keyBalance: number; // For Contributors: $KEY token balance
+  pointsPurchased?: number; // USDC spent (for Spenders)
   pointsSpent: number;
   contributions: number;
   generations: number;
@@ -169,7 +178,12 @@ export interface UserStats {
 
 export interface PlatformStats {
   totalUsers: number;
-  totalPointsGenerated: number;
+  totalSpenders: number;
+  totalContributors: number;
+  totalUsdcReceived: number; // Total USDC received from Spenders
+  totalKeyPurchased: number; // Total $KEY purchased via buyback
+  totalKeyDistributed: number; // Total $KEY distributed to Contributors
+  totalPointsPurchased: number;
   totalPointsSpent: number;
   totalGenerations: number;
   generationsByTool: Record<AITool, number>;
@@ -196,6 +210,18 @@ export interface PaginatedResponse<T> {
   hasPrev: boolean;
 }
 
+// Solana Configuration
+export interface SolanaConfig {
+  rpcUrl: string;
+  network: "mainnet-beta" | "devnet" | "testnet";
+  keyTokenMint: string; // $KEY token mint address (SPL)
+  usdcMint: string; // USDC mint address (SPL)
+  rewardsTreasuryWallet: string; // Treasury wallet address for $KEY rewards
+  paymentProgramId?: string; // Solana program ID for payment/buyback
+  jupiterApiUrl?: string; // Jupiter aggregator API URL
+  pointsPriceUsdc: number; // Price of 1 Point in USDC (e.g., 0.001)
+}
+
 // Configuration types
 export interface KeylessConfig {
   jwtSecret: string;
@@ -206,6 +232,8 @@ export interface KeylessConfig {
   corsOrigin: string;
   apiKeyHeader: string;
   maxRequestsPerMinute: number;
+  // Solana configuration
+  solana: SolanaConfig;
   // AI service configurations
   textGenerationModel: string;
   imageGenerationModel: string;
@@ -241,10 +269,31 @@ export interface LoginResponse {
   token: string;
   user: {
     id: string;
-    email: string;
-    walletAddress: string;
+    solanaWalletAddress: string;
+    userType: UserType;
     pointsBalance: number;
+    keyBalance: number;
   };
+}
+
+// Payment/Buyback types
+export interface PaymentRequest {
+  usdcAmount: number; // Amount of USDC to pay
+  walletAddress: string; // User's Solana wallet address
+}
+
+export interface PaymentResponse {
+  transactionHash: string;
+  pointsCredited: number;
+  keyPurchased: number; // $KEY purchased via buyback
+  usdcAmount: number;
+}
+
+export interface BuybackMetrics {
+  totalUsdcReceived: number;
+  totalKeyPurchased: number;
+  buybackTransactions: number;
+  averageBuybackSize: number;
 }
 
 export interface ApiKeyCredentials {

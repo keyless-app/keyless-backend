@@ -12,8 +12,8 @@ keyless.initialize().catch(console.error);
 
 /**
  * @route GET /api/points/balance
- * @desc Get user points balance
- * @access Private (with API key)
+ * @desc Get user points balance (for Spenders)
+ * @access Private (with Solana wallet address)
  */
 router.get(
   "/balance",
@@ -33,7 +33,7 @@ router.get(
 /**
  * @route GET /api/points/transactions
  * @desc Get user points transactions
- * @access Private (with API key)
+ * @access Private (with Solana wallet address)
  */
 router.get(
   "/transactions",

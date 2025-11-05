@@ -8,6 +8,9 @@ import {
 
 /**
  * Manages user contributions to train and improve AI models
+ * 
+ * Contributors earn $KEY tokens (not points) for their contributions.
+ * $KEY tokens are paid out from the Rewards Treasury.
  */
 export class ContributionManager {
   private config: KeylessConfig;
@@ -34,13 +37,14 @@ export class ContributionManager {
 
   /**
    * Add a contribution
+   * Contributors earn $KEY tokens, not points
    */
   async addContribution(
     userId: string,
     type: string,
     modelId: string,
     data: any,
-    pointsEarned: number
+    keyEarned: number
   ): Promise<string> {
     const contributionId = this.generateContributionId();
 
@@ -50,7 +54,7 @@ export class ContributionManager {
       type: type as ContributionType,
       modelId,
       data,
-      pointsEarned,
+      keyEarned, // $KEY tokens earned (not points)
       status: ContributionStatus.PENDING,
       createdAt: new Date(),
     };

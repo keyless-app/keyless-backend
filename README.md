@@ -4,7 +4,6 @@
 [![npm downloads](https://img.shields.io/npm/dm/@keyless/keyless-api.svg)](https://www.npmjs.com/package/@keyless/keyless-api)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-<img width="4688" height="1563" alt="banner" src="https://github.com/user-attachments/assets/970afedd-9c36-4bea-8fdf-86499f2f75aa" />
 
 > **Train AI models. Earn $KEY. Generate without limits. Powered by Solana.**
 

@@ -1,5 +1,5 @@
 {
-  "name": "@keyless/keyless-api",
+  "name": "@keyless-app/keyless-api",
   "version": "1.0.1",
   "description": "Solana-powered AI generation platform with Revenue-to-Buyback Flywheel. The first AI platform with real-time, transparent buyback mechanism powered by Solana's speed and low fees.",
   "main": "dist/index.js",
@@ -73,12 +73,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/keyless/keyless-api.git"
+    "url": "git+https://github.com/keyless-app/keyless-api.git"
   },
   "bugs": {
-    "url": "https://github.com/keyless/keyless-api/issues"
+    "url": "https://github.com/keyless-app/keyless-api/issues"
   },
-  "homepage": "https://github.com/keyless/keyless-api#readme",
+  "homepage": "https://github.com/keyless-app/keyless-api#readme",
   "publishConfig": {
     "access": "public"
   },

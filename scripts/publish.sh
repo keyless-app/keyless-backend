@@ -51,7 +51,7 @@ echo "📤 Publishing to npm..."
 npm publish --access public
 
 echo "✅ Published successfully!"
-echo "📦 Package: @keyless/keyless-api"
-echo "🌐 Check it out: https://www.npmjs.com/package/@keyless/keyless-api"
+echo "📦 Package: @keyless-app/keyless-backend"
+echo "🌐 Check it out: https://www.npmjs.com/package/@keyless-app/keyless-backend"
 
 

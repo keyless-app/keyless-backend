@@ -14,8 +14,8 @@ import { Keyless, DEFAULT_CONFIG, UserType, AITool } from "../src";
 async function main() {
   try {
     console.log("🚀 Initializing Keyless SDK...");
-    console.log("📦 Package: @keyless/keyless-api");
-    console.log("🔗 npm: https://www.npmjs.com/package/@keyless/keyless-api");
+    console.log("📦 Package: @keyless-app/keyless-backend");
+    console.log("🔗 npm: https://www.npmjs.com/package/@keyless-app/keyless-backend");
     console.log("=".repeat(50));
 
     // Initialize Keyless platform
@@ -164,7 +164,7 @@ async function main() {
     console.log("   • Contribute training data to earn $KEY tokens");
     console.log("   • Explore the Revenue-to-Buyback Flywheel");
     console.log("");
-    console.log("🔗 Learn more: https://github.com/keyless/keyless-api");
+    console.log("🔗 Learn more: https://github.com/keyless-app/keyless-backend");
   } catch (error) {
     console.error("❌ Error:", error);
     process.exit(1);

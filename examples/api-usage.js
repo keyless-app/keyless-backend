@@ -288,8 +288,8 @@ async function purchasePoints() {
 async function runExamples() {
   console.log("🚀 Keyless API Examples\n");
   console.log("=".repeat(50));
-  console.log("📦 Package: @keyless/keyless-api");
-  console.log("🔗 npm: https://www.npmjs.com/package/@keyless/keyless-api");
+    console.log("📦 Package: @keyless-app/keyless-backend");
+    console.log("🔗 npm: https://www.npmjs.com/package/@keyless-app/keyless-backend");
   console.log("=".repeat(50));
 
   try {
@@ -314,7 +314,7 @@ async function runExamples() {
     console.log("   • Purchase Points with USDC to use the API");
     console.log("   • Contribute training data to earn $KEY tokens");
     console.log("   • Explore the Revenue-to-Buyback Flywheel");
-    console.log("\n🔗 Learn more: https://github.com/keyless/keyless-api");
+    console.log("\n🔗 Learn more: https://github.com/keyless-app/keyless-backend");
   } catch (error) {
     console.error("\n❌ Examples failed:", error.message);
   }

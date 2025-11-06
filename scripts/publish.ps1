@@ -53,7 +53,7 @@ Write-Host "📤 Publishing to npm..." -ForegroundColor Cyan
 npm publish --access public
 
 Write-Host "✅ Published successfully!" -ForegroundColor Green
-Write-Host "📦 Package: @keyless/keyless-api" -ForegroundColor Cyan
-Write-Host "🌐 Check it out: https://www.npmjs.com/package/@keyless/keyless-api" -ForegroundColor Cyan
+Write-Host "📦 Package: @keyless-app/keyless-backend" -ForegroundColor Cyan
+Write-Host "🌐 Check it out: https://www.npmjs.com/package/@keyless-app/keyless-backend" -ForegroundColor Cyan
 
 

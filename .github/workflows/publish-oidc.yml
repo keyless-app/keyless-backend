@@ -97,7 +97,7 @@ jobs:
             ## Installation
             
             ```bash
-            npm install @keyless/keyless-api@${{ github.ref_name }}
+            npm install @keyless-app/keyless-backend@${{ github.ref_name }}
             ```
           draft: false
           prerelease: false

@@ -34,10 +34,21 @@ jobs:
         with:
           node-version: '18'
           registry-url: 'https://npm.pkg.github.com'
-          scope: '@keyless'
+          scope: '@${{ github.repository_owner }}'
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Update package.json for GitHub Packages
+        run: |
+          # Get the repository owner (scope)
+          OWNER="${{ github.repository_owner }}"
+          # Update package name to match GitHub scope
+          npm pkg set name="@${OWNER}/keyless-backend"
+          # Set publishConfig for GitHub Packages
+          npm pkg set publishConfig.registry="https://npm.pkg.github.com"
+          npm pkg set publishConfig."@${OWNER}:registry"="https://npm.pkg.github.com"
+          echo "Updated package name to @${OWNER}/keyless-backend"
 
       - name: Build package
         run: npm run build
@@ -47,15 +58,22 @@ jobs:
         run: |
           PACKAGE_VERSION=$(node -p "require('./package.json').version")
           PACKAGE_NAME=$(node -p "require('./package.json').name")
+          OWNER="${{ github.repository_owner }}"
           
           # Check if version exists on GitHub Packages
-          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version --registry=https://npm.pkg.github.com > /dev/null 2>&1; then
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version --registry=https://npm.pkg.github.com --@${OWNER}:registry=https://npm.pkg.github.com > /dev/null 2>&1; then
             echo "published=true" >> $GITHUB_OUTPUT
             echo "Version $PACKAGE_VERSION already exists on GitHub Packages"
           else
             echo "published=false" >> $GITHUB_OUTPUT
             echo "Version $PACKAGE_VERSION is not published yet"
           fi
+
+      - name: Configure npm for GitHub Packages
+        run: |
+          OWNER="${{ github.repository_owner }}"
+          echo "@${OWNER}:registry=https://npm.pkg.github.com" >> .npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> .npmrc
 
       - name: Publish to GitHub Packages
         if: steps.check-published.outputs.published == 'false'

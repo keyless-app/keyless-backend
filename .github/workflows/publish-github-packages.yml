@@ -1,0 +1,65 @@
+name: Publish to GitHub Packages
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version bump type (patch, minor, major)'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@keyless'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build
+
+      - name: Check if already published
+        id: check-published
+        run: |
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          
+          # Check if version exists on GitHub Packages
+          if npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version --registry=https://npm.pkg.github.com > /dev/null 2>&1; then
+            echo "published=true" >> $GITHUB_OUTPUT
+            echo "Version $PACKAGE_VERSION already exists on GitHub Packages"
+          else
+            echo "published=false" >> $GITHUB_OUTPUT
+            echo "Version $PACKAGE_VERSION is not published yet"
+          fi
+
+      - name: Publish to GitHub Packages
+        if: steps.check-published.outputs.published == 'false'
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

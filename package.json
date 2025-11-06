@@ -1,6 +1,6 @@
 {
   "name": "@keyless/keyless-api",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Solana-powered AI generation platform with Revenue-to-Buyback Flywheel. The first AI platform with real-time, transparent buyback mechanism powered by Solana's speed and low fees.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

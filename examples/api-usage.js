@@ -1,17 +1,16 @@
 /**
- * CollectFi API Usage Examples
+ * Keyless API Usage Examples
  *
- * This example demonstrates how to interact with the CollectFi API
- * using different API keys and endpoints.
+ * This example demonstrates how to interact with the Keyless API
+ * using Solana wallet addresses for authentication.
  */
 
 const API_BASE_URL = "http://localhost:3000"; // Change to your API URL
 
-// Sample API keys (replace with your actual keys)
-const API_KEYS = {
-  READ_ONLY: "cf_live_1234567890abcdef",
-  TRADING: "cf_live_0987654321fedcba",
-  ADMIN: "cf_live_admin_superuser",
+// Sample Solana wallet addresses (replace with your actual wallet addresses)
+const WALLET_ADDRESSES = {
+  SPENDER: "YourSpenderWalletAddress123456789", // Spender wallet (pays USDC for Points)
+  CONTRIBUTOR: "YourContributorWalletAddress987654321", // Contributor wallet (earns $KEY)
 };
 
 // Helper function to make API requests
@@ -22,10 +21,13 @@ async function makeRequest(endpoint, options = {}) {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
-      "X-API-Key": options.apiKey || API_KEYS.READ_ONLY,
+      "X-Wallet-Address": options.walletAddress || WALLET_ADDRESSES.SPENDER,
     },
     ...options,
   };
+
+  // Remove walletAddress from options before passing to fetch
+  delete config.walletAddress;
 
   try {
     const response = await fetch(url, config);
@@ -49,210 +51,270 @@ async function checkHealth() {
   try {
     const health = await makeRequest("/health");
     console.log("✅ API Status:", health.status);
-    console.log("📊 Solana Network:", health.solana.network);
-    console.log("🔗 RPC Endpoint:", health.solana.endpoint);
+    console.log("📊 Service:", health.service);
+    console.log("🔗 Version:", health.version);
   } catch (error) {
     console.error("❌ Health check failed:", error.message);
   }
 }
 
-// Example 2: Get Available Assets
-async function getAssets() {
-  console.log("\n📦 Fetching available collectibles...");
+// Example 2: Get Points Balance (for Spenders)
+async function getPointsBalance() {
+  console.log("\n💰 Fetching points balance...");
 
   try {
-    const assets = await makeRequest("/api/assets");
-    console.log(`✅ Found ${assets.count} assets:`);
+    const balance = await makeRequest("/api/points/balance", {
+      walletAddress: WALLET_ADDRESSES.SPENDER,
+    });
+    console.log("✅ Points Balance:", balance.data.balance);
+    console.log("💡 Use points to generate AI content");
+  } catch (error) {
+    console.error("❌ Failed to fetch points balance:", error.message);
+  }
+}
 
-    assets.data.forEach((asset) => {
-      console.log(`   🎴 ${asset.name}`);
-      console.log(`   💰 Price: ${asset.currentPrice} SOL`);
-      console.log(`   📊 Supply: ${asset.totalSupply.toLocaleString()} tokens`);
-      console.log(`   🔐 Auth: ${asset.authentication.provider}`);
-      console.log("");
+// Example 3: Get Points Transactions
+async function getPointsTransactions() {
+  console.log("\n📜 Fetching points transactions...");
+
+  try {
+    const transactions = await makeRequest("/api/points/transactions", {
+      walletAddress: WALLET_ADDRESSES.SPENDER,
+    });
+    console.log(`✅ Found ${transactions.count} transactions:`);
+
+    transactions.data.slice(0, 5).forEach((tx) => {
+      console.log(`   ${tx.type}: ${tx.amount} points - ${tx.description}`);
+      if (tx.usdcAmount) {
+        console.log(`      USDC: $${tx.usdcAmount}`);
+      }
     });
   } catch (error) {
-    console.error("❌ Failed to fetch assets:", error.message);
+    console.error("❌ Failed to fetch transactions:", error.message);
   }
 }
 
-// Example 3: Search Assets
-async function searchAssets() {
-  console.log("\n🔍 Searching for luxury watches under 200 SOL...");
+// Example 4: Generate Text Content
+async function generateText() {
+  console.log("\n✍️ Generating text content...");
 
   try {
-    const searchResults = await makeRequest(
-      "/api/assets/search?category=memorabilia&maxPrice=200"
-    );
-    console.log(`✅ Found ${searchResults.count} assets matching criteria:`);
-
-    searchResults.data.forEach((asset) => {
-      console.log(`   • ${asset.name} - ${asset.currentPrice} SOL`);
-    });
-  } catch (error) {
-    console.error("❌ Search failed:", error.message);
-  }
-}
-
-// Example 4: Get Market Data
-async function getMarketData() {
-  console.log("\n📈 Fetching market data...");
-
-  try {
-    const marketData = await makeRequest("/api/trading/market-data");
-    console.log(`✅ Market data for ${marketData.count} assets:`);
-
-    marketData.data.forEach((data) => {
-      console.log(`   📊 Asset: ${data.assetMint}`);
-      console.log(`   💰 Current Price: ${data.currentPrice} SOL`);
-      console.log(
-        `   📈 24h Change: ${data.priceChangePercentage24h > 0 ? "+" : ""}${
-          data.priceChangePercentage24h
-        }%`
-      );
-      console.log(`   💎 Volume: ${data.volume24h} SOL`);
-      console.log("");
-    });
-  } catch (error) {
-    console.error("❌ Failed to fetch market data:", error.message);
-  }
-}
-
-// Example 5: Get Trending Assets
-async function getTrendingAssets() {
-  console.log("\n🔥 Fetching trending assets...");
-
-  try {
-    const trending = await makeRequest("/api/market/trending?limit=3");
-    console.log(`✅ Top ${trending.count} trending assets:`);
-
-    trending.data.forEach((asset, index) => {
-      console.log(`   ${index + 1}. ${asset.name} - ${asset.currentPrice} SOL`);
-    });
-  } catch (error) {
-    console.error("❌ Failed to fetch trending assets:", error.message);
-  }
-}
-
-// Example 6: Get Market Overview
-async function getMarketOverview() {
-  console.log("\n📊 Fetching market overview...");
-
-  try {
-    const overview = await makeRequest("/api/market/overview");
-    console.log("✅ Market Overview:");
-    console.log(`   🎴 Total Assets: ${overview.data.totalAssets}`);
-    console.log(
-      `   💰 Total Market Cap: ${(overview.data.totalMarketCap / 1e6).toFixed(
-        2
-      )}M SOL`
-    );
-    console.log(`   📈 Total 24h Volume: ${overview.data.totalVolume24h} SOL`);
-    console.log(
-      `   📊 Average 24h Change: ${overview.data.averagePriceChange24h.toFixed(
-        2
-      )}%`
-    );
-  } catch (error) {
-    console.error("❌ Failed to fetch market overview:", error.message);
-  }
-}
-
-// Example 7: Place Trading Order (requires trading API key)
-async function placeOrder() {
-  console.log("\n📝 Placing trading order...");
-
-  try {
-    const orderData = {
-      assetMint: "ROLEXDAYTONA1mintaddress123456789",
-      side: "buy",
-      quantity: 1000,
-      price: 180,
-      type: "limit",
-    };
-
-    const order = await makeRequest("/api/trading/place-order", {
+    const result = await makeRequest("/api/generation/text", {
       method: "POST",
-      body: JSON.stringify(orderData),
-      apiKey: API_KEYS.TRADING,
+      body: JSON.stringify({
+        prompt: "Write a short story about an AI assistant helping developers",
+        config: {
+          maxTokens: 500,
+          temperature: 0.7,
+        },
+      }),
+      walletAddress: WALLET_ADDRESSES.SPENDER,
     });
 
-    console.log("✅ Order placed successfully:");
-    console.log(`   🆔 Order ID: ${order.data.orderId}`);
-    console.log(`   📊 Type: ${order.data.type}`);
-    console.log(`   📈 Side: ${order.data.side}`);
-    console.log(`   💰 Price: ${order.data.price} SOL`);
-    console.log(`   📦 Quantity: ${order.data.quantity}`);
+    console.log("✅ Text Generated:");
+    console.log(`   ${result.data.text.substring(0, 200)}...`);
+    console.log(`   💰 Cost: 5 points`);
   } catch (error) {
-    console.error("❌ Failed to place order:", error.message);
+    console.error("❌ Failed to generate text:", error.message);
   }
 }
 
-// Example 8: Get Portfolio (requires user wallet address)
-async function getPortfolio(walletAddress) {
-  console.log(`\n💼 Fetching portfolio for ${walletAddress}...`);
+// Example 5: Generate Image
+async function generateImage() {
+  console.log("\n🎨 Generating image...");
 
   try {
-    const portfolio = await makeRequest(`/api/portfolio/${walletAddress}`);
-    console.log("✅ Portfolio Details:");
-    console.log(`   💰 Total Value: ${portfolio.data.totalValue} SOL`);
-    console.log(
-      `   📊 24h P&L: ${portfolio.data.pnl24h > 0 ? "+" : ""}${
-        portfolio.data.pnl24h
-      } SOL`
-    );
-    console.log(
-      `   📈 7-day P&L: ${portfolio.data.pnl7d > 0 ? "+" : ""}${
-        portfolio.data.pnl7d
-      } SOL`
-    );
-    console.log(`   🎴 Assets: ${portfolio.data.assets.length}`);
+    const result = await makeRequest("/api/generation/image", {
+      method: "POST",
+      body: JSON.stringify({
+        prompt: "A futuristic AI city at sunset",
+        config: {
+          width: 1024,
+          height: 1024,
+        },
+      }),
+      walletAddress: WALLET_ADDRESSES.SPENDER,
+    });
+
+    console.log("✅ Image Generated:");
+    console.log(`   Images: ${result.data.images.length}`);
+    console.log(`   💰 Cost: 8 points per image`);
   } catch (error) {
-    console.error("❌ Failed to fetch portfolio:", error.message);
+    console.error("❌ Failed to generate image:", error.message);
   }
 }
 
-// Example 9: Get Vault Information
-async function getVaultInfo(assetId) {
-  console.log(`\n🏦 Fetching vault info for asset ${assetId}...`);
+// Example 6: Generate Code
+async function generateCode() {
+  console.log("\n💻 Generating code...");
 
   try {
-    const vaultInfo = await makeRequest(`/api/vault/${assetId}`);
-    console.log("✅ Vault Information:");
-    console.log(`   🆔 Vault ID: ${vaultInfo.data.vaultId}`);
-    console.log(`   📍 Location: ${vaultInfo.data.location}`);
-    console.log(`   🌡️ Temperature: ${vaultInfo.data.temperature}°C`);
-    console.log(`   💧 Humidity: ${vaultInfo.data.humidity}%`);
-    console.log(`   🔒 Security Level: ${vaultInfo.data.securityLevel}`);
+    const result = await makeRequest("/api/generation/code", {
+      method: "POST",
+      body: JSON.stringify({
+        prompt: "Create a REST API endpoint in TypeScript",
+        config: {
+          language: "typescript",
+        },
+      }),
+      walletAddress: WALLET_ADDRESSES.SPENDER,
+    });
+
+    console.log("✅ Code Generated:");
+    console.log(`   Language: ${result.data.language}`);
+    console.log(`   💰 Cost: 6 points`);
   } catch (error) {
-    console.error("❌ Failed to fetch vault info:", error.message);
+    console.error("❌ Failed to generate code:", error.message);
+  }
+}
+
+// Example 7: Add Contribution (for Contributors - earns $KEY)
+async function addContribution() {
+  console.log("\n📝 Adding contribution to earn $KEY...");
+
+  try {
+    const result = await makeRequest("/api/contributions", {
+      method: "POST",
+      body: JSON.stringify({
+        type: "training_data",
+        modelId: "model_001",
+        data: {
+          prompt: "What is Solana?",
+          response: "Solana is a high-performance blockchain platform designed for decentralized applications.",
+        },
+        keyEarned: 50, // $KEY tokens earned
+      }),
+      walletAddress: WALLET_ADDRESSES.CONTRIBUTOR,
+    });
+
+    console.log("✅ Contribution added successfully:");
+    console.log(`   🆔 Contribution ID: ${result.data.contributionId}`);
+    console.log(`   💰 $KEY Earned: ${result.keyEarned}`);
+    console.log("   💡 $KEY tokens will be paid out from Rewards Treasury");
+  } catch (error) {
+    console.error("❌ Failed to add contribution:", error.message);
+  }
+}
+
+// Example 8: Get User Contributions
+async function getUserContributions() {
+  console.log("\n📚 Fetching user contributions...");
+
+  try {
+    const contributions = await makeRequest("/api/contributions", {
+      walletAddress: WALLET_ADDRESSES.CONTRIBUTOR,
+    });
+
+    console.log(`✅ Found ${contributions.count} contributions:`);
+
+    contributions.data.slice(0, 3).forEach((contrib) => {
+      console.log(`   ${contrib.type}: ${contrib.keyEarned} $KEY - ${contrib.status}`);
+      console.log(`      Created: ${new Date(contrib.createdAt).toLocaleDateString()}`);
+    });
+  } catch (error) {
+    console.error("❌ Failed to fetch contributions:", error.message);
+  }
+}
+
+// Example 9: Get User Statistics
+async function getUserStats() {
+  console.log("\n📊 Fetching user statistics...");
+
+  try {
+    const stats = await makeRequest("/api/stats/user", {
+      walletAddress: WALLET_ADDRESSES.SPENDER,
+    });
+
+    console.log("✅ User Statistics:");
+    console.log(`   👤 User Type: ${stats.data.userType}`);
+    console.log(`   💰 Points Balance: ${stats.data.totalPoints}`);
+    if (stats.data.keyBalance) {
+      console.log(`   🔑 $KEY Balance: ${stats.data.keyBalance}`);
+    }
+    console.log(`   📈 Points Spent: ${stats.data.pointsSpent}`);
+    console.log(`   🎨 Generations: ${stats.data.generations}`);
+    console.log(`   📝 Contributions: ${stats.data.contributions}`);
+  } catch (error) {
+    console.error("❌ Failed to fetch user stats:", error.message);
+  }
+}
+
+// Example 10: Get Platform Statistics
+async function getPlatformStats() {
+  console.log("\n🌐 Fetching platform statistics...");
+
+  try {
+    const stats = await makeRequest("/api/stats/platform");
+
+    console.log("✅ Platform Statistics:");
+    console.log(`   👥 Total Users: ${stats.data.totalUsers}`);
+    console.log(`   💳 Spenders: ${stats.data.totalSpenders}`);
+    console.log(`   🎓 Contributors: ${stats.data.totalContributors}`);
+    console.log(`   💰 Total USDC Received: $${stats.data.totalUsdcReceived}`);
+    console.log(`   🔑 Total $KEY Purchased: ${stats.data.totalKeyPurchased}`);
+    console.log(`   🎁 Total $KEY Distributed: ${stats.data.totalKeyDistributed}`);
+    console.log(`   📊 Total Generations: ${stats.data.totalGenerations}`);
+  } catch (error) {
+    console.error("❌ Failed to fetch platform stats:", error.message);
+  }
+}
+
+// Example 11: Purchase Points (Spenders - requires USDC payment)
+async function purchasePoints() {
+  console.log("\n💳 Purchasing points with USDC...");
+
+  try {
+    const result = await makeRequest("/api/payment/purchase", {
+      method: "POST",
+      body: JSON.stringify({
+        usdcAmount: 10.0, // $10 USDC
+      }),
+      walletAddress: WALLET_ADDRESSES.SPENDER,
+    });
+
+    console.log("✅ Points purchased successfully:");
+    console.log(`   💰 USDC Paid: $${result.usdcAmount}`);
+    console.log(`   🎯 Points Credited: ${result.pointsCredited}`);
+    console.log(`   🔑 $KEY Purchased (via buyback): ${result.keyPurchased}`);
+    console.log(`   📝 Transaction: ${result.transactionHash}`);
+    console.log("   💡 Buyback automatically swapped USDC → $KEY");
+  } catch (error) {
+    console.error("❌ Failed to purchase points:", error.message);
+    console.log("   💡 Note: This requires actual USDC payment on Solana");
   }
 }
 
 // Main function to run all examples
 async function runExamples() {
-  console.log("🚀 CollectFi API Examples\n");
+  console.log("🚀 Keyless API Examples\n");
+  console.log("=".repeat(50));
+  console.log("📦 Package: @keyless/keyless-api");
+  console.log("🔗 npm: https://www.npmjs.com/package/@keyless/keyless-api");
   console.log("=".repeat(50));
 
   try {
     // Run examples in sequence
     await checkHealth();
-    await getAssets();
-    await searchAssets();
-    await getMarketData();
-    await getTrendingAssets();
-    await getMarketOverview();
+    await getPointsBalance();
+    await getPointsTransactions();
+    await generateText();
+    await generateImage();
+    await generateCode();
+    await addContribution();
+    await getUserContributions();
+    await getUserStats();
+    await getPlatformStats();
 
-    // These examples require specific conditions
-    // await placeOrder(); // Requires trading API key
-    // await getPortfolio('TestWallet123'); // Requires valid wallet address
-    // await getVaultInfo('rolex-daytona-panda-1'); // Requires valid asset ID
+    // This example requires actual USDC payment on Solana
+    // await purchasePoints();
 
     console.log("\n🎉 All examples completed successfully!");
     console.log("\n💡 Next steps:");
-    console.log("   • Try different API keys for different permissions");
-    console.log("   • Explore more endpoints and parameters");
-    console.log("   • Build your own trading application");
+    console.log("   • Connect your Solana wallet (Phantom, Solflare)");
+    console.log("   • Purchase Points with USDC to use the API");
+    console.log("   • Contribute training data to earn $KEY tokens");
+    console.log("   • Explore the Revenue-to-Buyback Flywheel");
+    console.log("\n🔗 Learn more: https://github.com/keyless/keyless-api");
   } catch (error) {
     console.error("\n❌ Examples failed:", error.message);
   }
@@ -267,12 +329,14 @@ if (typeof require !== "undefined" && require.main === module) {
 module.exports = {
   makeRequest,
   checkHealth,
-  getAssets,
-  searchAssets,
-  getMarketData,
-  getTrendingAssets,
-  getMarketOverview,
-  placeOrder,
-  getPortfolio,
-  getVaultInfo,
+  getPointsBalance,
+  getPointsTransactions,
+  generateText,
+  generateImage,
+  generateCode,
+  addContribution,
+  getUserContributions,
+  getUserStats,
+  getPlatformStats,
+  purchasePoints,
 };

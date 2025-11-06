@@ -1,239 +1,175 @@
 /**
- * Basic Usage Example for CollectFi SDK
+ * Basic Usage Example for Keyless SDK
  *
  * This example demonstrates how to:
- * - Initialize the CollectFi platform
- * - Connect a wallet
- * - Get available assets
- * - View asset details
- * - Get market data
- * - Check user portfolio
+ * - Initialize the Keyless platform
+ * - Use Solana wallet authentication
+ * - Generate AI content (for Spenders)
+ * - Add contributions to earn $KEY (for Contributors)
+ * - Check points and $KEY balances
  */
 
-import { Connection } from "@solana/web3.js";
-import { CollectFi, DEFAULT_CONFIG } from "../src";
+import { Keyless, DEFAULT_CONFIG, UserType, AITool } from "../src";
 
 async function main() {
   try {
-    console.log("🚀 Initializing CollectFi SDK...");
+    console.log("🚀 Initializing Keyless SDK...");
+    console.log("📦 Package: @keyless/keyless-api");
+    console.log("🔗 npm: https://www.npmjs.com/package/@keyless/keyless-api");
+    console.log("=".repeat(50));
 
-    // Create Solana connection
-    const connection = new Connection(DEFAULT_CONFIG.rpcEndpoint, "confirmed");
+    // Initialize Keyless platform
+    const keyless = new Keyless(DEFAULT_CONFIG);
+    await keyless.initialize();
 
-    // Initialize CollectFi platform
-    const collectFi = new CollectFi(connection, DEFAULT_CONFIG);
-    await collectFi.initialize();
+    console.log("✅ Keyless platform initialized successfully!");
+    console.log("");
 
-    console.log("✅ CollectFi platform initialized successfully!");
+    // Example 1: Create a Spender user
+    console.log("👤 Example 1: Creating Spender user...");
+    const spenderWallet = "YourSpenderWalletAddress123456789";
+    const spenderUser = {
+      id: "spender_001",
+      solanaWalletAddress: spenderWallet,
+      userType: UserType.SPENDER,
+      pointsBalance: 1000, // Purchased with USDC
+      keyBalance: 0,
+      contributions: 0,
+      contributionsHistory: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
 
-    // Get wallet instance
-    const wallet = collectFi.getWallet();
+    await keyless.addUser(spenderUser);
+    console.log(`✅ Spender user created: ${spenderWallet}`);
+    console.log(`   Points Balance: ${spenderUser.pointsBalance}`);
+    console.log("");
 
-    // Connect wallet (in production, this would connect to Phantom/Backpack/etc.)
-    console.log("🔗 Connecting wallet...");
-    await wallet.connect();
-
-    if (wallet.isConnected()) {
-      console.log(`✅ Wallet connected: ${wallet.getAddress()}`);
-
-      // Get wallet information
-      const walletInfo = await wallet.getWalletInfo();
-      if (walletInfo) {
-        console.log(`💰 SOL Balance: ${walletInfo.balance} SOL`);
-        console.log(`🎯 Wallet Type: ${walletInfo.walletType}`);
-        console.log(
-          `🔑 Token Holdings: ${walletInfo.tokens.length} different tokens`
-        );
-      }
-    } else {
-      console.log("⚠️  Wallet not connected, using demo mode");
-    }
-
-    // Get available collectible assets
-    console.log("\n📦 Fetching available collectibles...");
-    const assets = await collectFi.getAvailableAssets();
-
-    console.log(`✅ Found ${assets.length} collectible assets:`);
-
-    for (const asset of assets) {
-      console.log(`\n🎴 ${asset.name}`);
-      console.log(`   📍 Category: ${asset.category}`);
-      console.log(`   💎 Rarity: ${asset.metadata.rarity}`);
-      console.log(`   🏷️  Current Price: ${asset.currentPrice} SOL`);
-      console.log(
-        `   📊 Total Supply: ${asset.totalSupply.toLocaleString()} tokens`
-      );
-      console.log(
-        `   🔐 Authentication: ${asset.authentication.provider} ${asset.authentication.grade}`
-      );
-      console.log(
-        `   🏦 Storage: ${asset.storage.location} (${asset.storage.securityLevel})`
-      );
-      console.log(
-        `   🛡️  Insurance: ${
-          asset.insurance.provider
-        } - $${asset.insurance.coverageAmount.toLocaleString()}`
-      );
-    }
-
-    // Get market data for first asset
-    if (assets.length > 0) {
-      const firstAsset = assets[0];
-      console.log(`\n📈 Market Data for ${firstAsset.name}:`);
-
-      const marketData = await collectFi.getMarketData(firstAsset.mint);
-      if (marketData) {
-        console.log(`   💰 Current Price: ${marketData.currentPrice} SOL`);
-        console.log(
-          `   📊 24h Change: ${marketData.priceChange24h > 0 ? "+" : ""}${
-            marketData.priceChange24h
-          } SOL (${marketData.priceChangePercentage24h > 0 ? "+" : ""}${
-            marketData.priceChangePercentage24h
-          }%)`
-        );
-        console.log(`   📈 24h High: ${marketData.high24h} SOL`);
-        console.log(`   📉 24h Low: ${marketData.low24h} SOL`);
-        console.log(`   💎 24h Volume: ${marketData.volume24h} SOL`);
-        console.log(
-          `   🏦 Market Cap: ${(marketData.marketCap / 1e6).toFixed(2)}M SOL`
-        );
-      }
-    }
-
-    // Get platform statistics
-    console.log("\n📊 Platform Statistics:");
-    const platformStats = await collectFi.getPlatformStats();
-    console.log(`   🎴 Total Assets: ${platformStats.totalAssets}`);
-    console.log(`   👥 Total Users: ${platformStats.totalUsers}`);
-    console.log(`   💰 24h Volume: ${platformStats.totalVolume24h} SOL`);
-    console.log(
-      `   🏦 Total Market Cap: ${(platformStats.totalMarketCap / 1e6).toFixed(
-        2
-      )}M SOL`
-    );
-    console.log(
-      `   🚀 Active Traders (24h): ${platformStats.activeTraders24h}`
-    );
-    console.log(`   📦 Total Redemptions: ${platformStats.totalRedemptions}`);
-
-    // Get trending assets
-    console.log("\n🔥 Trending Assets:");
-    const trendingAssets = await collectFi.getTrendingAssets(3);
-    for (let i = 0; i < trendingAssets.length; i++) {
-      const asset = trendingAssets[i];
-      console.log(`   ${i + 1}. ${asset.name} - ${asset.currentPrice} SOL`);
-    }
-
-    // Search assets by criteria
-    console.log("\n🔍 Searching for luxury watches under 200 SOL:");
-    const searchResults = await collectFi.searchAssets({
-      category: "memorabilia",
-      maxPrice: 200,
-    });
-
-    console.log(`   Found ${searchResults.length} assets matching criteria:`);
-    searchResults.forEach((asset) => {
-      console.log(`      • ${asset.name} - ${asset.currentPrice} SOL`);
-    });
-
-    // Get price history for first asset
-    if (assets.length > 0) {
-      const firstAsset = assets[0];
-      console.log(`\n📊 Price History for ${firstAsset.name} (7 days):`);
-
-      const priceHistory = await collectFi.getAssetPriceHistory(
-        firstAsset.mint,
-        "7d"
-      );
-      if (priceHistory.length > 0) {
-        const oldestPrice = priceHistory[0].price;
-        const newestPrice = priceHistory[priceHistory.length - 1].price;
-        const change = newestPrice - oldestPrice;
-        const changePercent = (change / oldestPrice) * 100;
-
-        console.log(
-          `   📅 7-day price change: ${change > 0 ? "+" : ""}${change.toFixed(
-            2
-          )} SOL (${changePercent > 0 ? "+" : ""}${changePercent.toFixed(2)}%)`
-        );
-        console.log(`   📈 Data points: ${priceHistory.length}`);
-      }
-    }
-
-    // Check user portfolio (if wallet is connected)
-    if (wallet.isConnected()) {
-      const walletAddress = wallet.getAddress()!;
-      console.log(`\n💼 Portfolio for ${walletAddress}:`);
-
-      const portfolio = await collectFi.getUserPortfolio(walletAddress);
-      if (portfolio) {
-        console.log(`   💰 Total Value: ${portfolio.totalValue} SOL`);
-        console.log(
-          `   📊 24h P&L: ${portfolio.pnl24h > 0 ? "+" : ""}${
-            portfolio.pnl24h
-          } SOL`
-        );
-        console.log(
-          `   📈 7-day P&L: ${portfolio.pnl7d > 0 ? "+" : ""}${
-            portfolio.pnl7d
-          } SOL`
-        );
-        console.log(`   🎴 Assets: ${portfolio.assets.length}`);
-
-        for (const asset of portfolio.assets) {
-          console.log(
-            `      • ${asset.assetId}: ${asset.quantity} tokens (${
-              asset.pnl > 0 ? "+" : ""
-            }${asset.pnl.toFixed(2)} SOL)`
-          );
+    // Example 2: Generate AI content (Spender)
+    console.log("✍️ Example 2: Generating text content...");
+    try {
+      const textResult = await keyless.generateAI(
+        "spender_001",
+        AITool.TEXT_GENERATION,
+        "Write a short story about an AI assistant helping developers build on Solana",
+        {
+          maxTokens: 500,
+          temperature: 0.7,
         }
-      } else {
-        console.log(
-          "   📭 No portfolio found - start trading to build your collection!"
-        );
-      }
+      );
+      console.log("✅ Text generated successfully!");
+      console.log(`   Preview: ${textResult.text.substring(0, 100)}...`);
+      console.log(`   Points spent: 5`);
+    } catch (error) {
+      console.error("❌ Failed to generate text:", error);
     }
+    console.log("");
 
-    // Get vault information
-    if (assets.length > 0) {
-      const firstAsset = assets[0];
-      console.log(`\n🏦 Vault Information for ${firstAsset.name}:`);
+    // Example 3: Check points balance
+    console.log("💰 Example 3: Checking points balance...");
+    const pointsBalance = await keyless.getUserPoints("spender_001");
+    console.log(`✅ Points Balance: ${pointsBalance}`);
+    console.log("");
 
-      const vaultInfo = await collectFi.getVaultInfo(firstAsset.id);
-      if (vaultInfo) {
-        console.log(`   🆔 Vault ID: ${vaultInfo.vaultId}`);
-        console.log(`   📍 Location: ${vaultInfo.location}`);
-        console.log(`   🌡️  Temperature: ${vaultInfo.temperature}°C`);
-        console.log(`   💧 Humidity: ${vaultInfo.humidity}%`);
-        console.log(`   🔒 Security Level: ${vaultInfo.securityLevel}`);
-        console.log(
-          `   🔍 Last Inspection: ${vaultInfo.lastInspection.toLocaleDateString()}`
-        );
-        console.log(
-          `   📅 Next Inspection: ${vaultInfo.nextInspection.toLocaleDateString()}`
-        );
-      }
+    // Example 4: Create a Contributor user
+    console.log("👤 Example 4: Creating Contributor user...");
+    const contributorWallet = "YourContributorWalletAddress987654321";
+    const contributorUser = {
+      id: "contributor_001",
+      solanaWalletAddress: contributorWallet,
+      userType: UserType.CONTRIBUTOR,
+      pointsBalance: 0,
+      keyBalance: 0, // Will earn $KEY from contributions
+      contributions: 0,
+      contributionsHistory: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    await keyless.addUser(contributorUser);
+    console.log(`✅ Contributor user created: ${contributorWallet}`);
+    console.log(`   $KEY Balance: ${contributorUser.keyBalance}`);
+    console.log("");
+
+    // Example 5: Add contribution (Contributor earns $KEY)
+    console.log("📝 Example 5: Adding contribution to earn $KEY...");
+    try {
+      const contributionId = await keyless.addContribution(
+        "contributor_001",
+        "training_data",
+        "model_001",
+        {
+          prompt: "What is Solana?",
+          response: "Solana is a high-performance blockchain platform designed for decentralized applications and crypto projects.",
+        },
+        50 // $KEY tokens earned
+      );
+      console.log("✅ Contribution added successfully!");
+      console.log(`   Contribution ID: ${contributionId}`);
+      console.log(`   $KEY Earned: 50`);
+      console.log("   💡 $KEY tokens will be paid out from Rewards Treasury");
+    } catch (error) {
+      console.error("❌ Failed to add contribution:", error);
     }
+    console.log("");
 
-    console.log("\n🎉 CollectFi SDK demo completed successfully!");
-    console.log("\n💡 Next steps:");
-    console.log("   • Explore more assets and market data");
-    console.log("   • Place trading orders (buy/sell tokens)");
-    console.log("   • Monitor your portfolio performance");
-    console.log("   • Request redemption when you own 100% of tokens");
+    // Example 6: Get user statistics
+    console.log("📊 Example 6: Getting user statistics...");
+    try {
+      const userStats = await keyless.getUserStats("spender_001");
+      if (userStats) {
+        console.log("✅ User Statistics:");
+        console.log(`   User Type: ${userStats.userType}`);
+        console.log(`   Points Balance: ${userStats.totalPoints}`);
+        console.log(`   Points Spent: ${userStats.pointsSpent}`);
+        console.log(`   Generations: ${userStats.generations}`);
+        console.log(`   Favorite Tool: ${userStats.favoriteTool}`);
+      }
+    } catch (error) {
+      console.error("❌ Failed to get user stats:", error);
+    }
+    console.log("");
+
+    // Example 7: Get platform statistics
+    console.log("🌐 Example 7: Getting platform statistics...");
+    try {
+      const platformStats = await keyless.getPlatformStats();
+      console.log("✅ Platform Statistics:");
+      console.log(`   Total Users: ${platformStats.totalUsers}`);
+      console.log(`   Spenders: ${platformStats.totalSpenders}`);
+      console.log(`   Contributors: ${platformStats.totalContributors}`);
+      console.log(`   Total USDC Received: $${platformStats.totalUsdcReceived}`);
+      console.log(`   Total $KEY Purchased: ${platformStats.totalKeyPurchased}`);
+      console.log(`   Total $KEY Distributed: ${platformStats.totalKeyDistributed}`);
+      console.log(`   Total Generations: ${platformStats.totalGenerations}`);
+    } catch (error) {
+      console.error("❌ Failed to get platform stats:", error);
+    }
+    console.log("");
+
+    // Example 8: The Revenue-to-Buyback Flywheel
+    console.log("🎯 Example 8: The Revenue-to-Buyback Flywheel");
+    console.log("   1. Spenders pay USDC (SPL) → Purchase Points → Use API");
+    console.log("   2. Buyback automatically swaps USDC → $KEY via Jupiter/Raydium");
+    console.log("   3. $KEY goes to Rewards Treasury");
+    console.log("   4. Contributors earn $KEY for training models");
+    console.log("   All powered by Solana's near-instant, low-cost transactions!");
+    console.log("");
+
+    console.log("🎉 All examples completed successfully!");
+    console.log("");
+    console.log("💡 Next steps:");
+    console.log("   • Connect your Solana wallet (Phantom, Solflare)");
+    console.log("   • Purchase Points with USDC to use the API");
+    console.log("   • Contribute training data to earn $KEY tokens");
+    console.log("   • Explore the Revenue-to-Buyback Flywheel");
+    console.log("");
+    console.log("🔗 Learn more: https://github.com/keyless/keyless-api");
   } catch (error) {
-    console.error("❌ Error running CollectFi SDK demo:", error);
-
-    if (error instanceof Error) {
-      console.error("   Error message:", error.message);
-      console.error("   Stack trace:", error.stack);
-    }
+    console.error("❌ Error:", error);
+    process.exit(1);
   }
 }
 
 // Run the example
-if (require.main === module) {
-  main().catch(console.error);
-}
-
-export { main };
+main();
